@@ -11,7 +11,7 @@ db = mysql.connector.connect(
 cursor = db.cursor()
 
 # Fetch data from the table
-cursor.execute("SELECT * FROM _2018")
+cursor.execute("SELECT * FROM _2019")
 data = cursor.fetchall()
 
 # Create a PrettyTable instance
