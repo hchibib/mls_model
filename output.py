@@ -4,14 +4,14 @@ from prettytable import PrettyTable
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    passwd="Pulisic20",
+    passwd=input("Password: "),
     database="mls_db"
 )
 
 cursor = db.cursor()
 
 # Fetch data from the table
-cursor.execute("SELECT * FROM _2019")
+cursor.execute("SELECT * FROM _2023")
 data = cursor.fetchall()
 
 # Create a PrettyTable instance

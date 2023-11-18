@@ -5,7 +5,7 @@ import csv
 db = mysql.connector.connect(
     host="localhost",
     user="root",
-    passwd="Pulisic20",
+    passwd=input("Password: "),
     database="mls_db"
 )
 
