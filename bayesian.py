@@ -1,8 +1,9 @@
 import mysql.connector
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, BayesianRidge
 from sklearn.metrics import mean_squared_error
+
 
 # MySQL connection
 try:
@@ -35,22 +36,28 @@ def preprocess_data(df):
         return df
 
 # Function to train and evaluate the model
-def train_and_evaluate_model(X_train, y_train, X_test, y_test):
-    model = LinearRegression()
+def train_and_evaluate_model(X_train, y_train, X_test, y_test, model_type='linear'):
+    if model_type == 'linear':
+        model = LinearRegression()
+    elif model_type == 'bayesian':
+        model = BayesianRidge()
+    else:
+        raise ValueError("Invalid model_type. Use 'linear' or 'bayesian'.")
+
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     mse = mean_squared_error(y_test, y_pred)
     print(f'Mean Squared Error: {mse}')
     return model
 
-
+# ... (Rest of the code remains unchanged)
 # Function to make predictions on new data
 def make_predictions(model, df_new):
     # Create a placeholder for _Wins column
     df_new['_Wins'] = None
 
     # Extract features
-    X_new = df_new.drop(['_Wins', '_Squad'], axis=1)
+    X_new = df_new.drop(['_Wins', '_Squad', 'id'], axis=1)
 
     # Make predictions
     y_pred_new = model.predict(X_new)
@@ -76,21 +83,29 @@ if __name__ == "__main__":
     # Data Preprocessing
     df_combined = preprocess_data(df_combined)
 
+
+
     # Split Data
-    X = df_combined.drop(['_Wins', '_Squad'], axis=1)
+    X = df_combined.drop(['_Wins', '_Squad', 'id'], axis=1)
     y = df_combined['_Wins']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Train and Evaluate the Model
-    trained_model = train_and_evaluate_model(X_train, y_train, X_test, y_test)
+    # Train and Evaluate the Linear Regression Model
+    trained_linear_model = train_and_evaluate_model(X_train, y_train, X_test, y_test, model_type='linear')
+
+    # Train and Evaluate the Bayesian Ridge Model
+    trained_bayesian_model = train_and_evaluate_model(X_train, y_train, X_test, y_test, model_type='bayesian')
 
     # Make Predictions on New Data
     df_new = load_data('_2023')  # Replace with the actual name of your new table
     df_new_processed = preprocess_data(df_new)
-    df_with_predictions = make_predictions(trained_model, df_new_processed)
 
-    # Check if df_with_predictions is not empty before printing
-    if not df_with_predictions.empty:
-        print(df_with_predictions[['_Squad', '_Wins']])
-    else:
-        print("No predictions to display.")
+    # Make Predictions using Linear Regression Model
+    df_linear_predictions = make_predictions(trained_linear_model, df_new_processed)
+    print("Linear Regression Model Predictions:")
+    print(df_linear_predictions[['_Squad', '_Wins']])
+
+    # Make Predictions using Bayesian Ridge Model
+    df_bayesian_predictions = make_predictions(trained_bayesian_model, df_new_processed)
+    print("\nBayesian Ridge Model Predictions:")
+    print(df_bayesian_predictions[['_Squad', '_Wins']])
